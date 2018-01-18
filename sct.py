@@ -15,7 +15,6 @@ default_config = {
     'to': 'tr'
 }
 
-
 class Translater(object):
     def __init__(self, configfile=None):
         self.API = "http://translate.googleapis.com/translate_a/single?client=gtx&sl={from_lang}&tl={to_lang}&dt=t&{query}"
@@ -72,8 +71,7 @@ class Translater(object):
             query=urllib.urlencode({
                 'q': word
             }))
-        translated = eval(requests.get(URL).text.replace('null',
-                                                         'None'))[0][0][0]
+        translated = eval(requests.get(URL).text.replace('null', 'None'))[0][0][0]
 
         return translated
 
@@ -97,8 +95,8 @@ class Translater(object):
 
                 translated = self.translate(self.config['from'], self.config['to'], word)
                 self.send_notify('* {0}: {1}'.format(word, translated))
+                
                 xerox.copy('')
-
 
 if __name__ == '__main__':
     sct = Translater()
