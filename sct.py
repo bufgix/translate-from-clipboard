@@ -5,8 +5,22 @@
 
 __author__ = '@laszlokuehl'
 
-import os, sys, urllib
-import json, requests, xerox
+import os, sys, signal, xerox
+import json, requests, string
+
+signal.signal(signal.SIGINT, lambda s, f: sys.exit())
+
+if sys.version_info[0] == 2:
+    from urllib import urlencode
+
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+    letters = string.letters
+else:
+    from urllib.parse import urlencode
+    letters = string.ascii_letters
+
+letters += 'üÜıİöÖşŞğĞçÇ'
 
 default_config = {
     'config': '{}/.sct.json'.format(os.path.expanduser('~')),
@@ -15,7 +29,7 @@ default_config = {
     'to': 'tr'
 }
 
-class Translater(object):
+class Translate(object):
     def __init__(self, configfile=None):
         self.API = "http://translate.googleapis.com/translate_a/single?client=gtx&sl={from_lang}&tl={to_lang}&dt=t&{query}"
 
@@ -24,8 +38,11 @@ class Translater(object):
 
         self.database = json.loads(open(self.config['dbpath'], 'r').read())
 
-    def inver_dict(self, d):
+    def invert_dict(self, d):
         return dict([(v, k) for k, v in d.items()])
+
+    def get_word(self, string):
+        return ''.join([x for x in string if x in letters])
 
     def parse_config(self, configfile=None):
         if configfile == None:
@@ -46,8 +63,8 @@ class Translater(object):
         return data
 
     def send_notify(self, msg):
-    	command = 'notify-send -a "STC" -u "Low" "{msg}"'.format(msg=msg)
-    	os.system(command)
+        command = 'notify-send -a "STC" -u "Low" "{msg}"'.format(msg=msg)
+        os.system(command)
 
     def insert_db(self, from_lang, to_lang, word, translated):
         if from_lang not in self.database.keys():
@@ -68,7 +85,7 @@ class Translater(object):
         URL = self.API.format(
             from_lang=from_lang,
             to_lang=to_lang,
-            query=urllib.urlencode({
+            query=urlencode({
                 'q': word
             }))
         translated = eval(requests.get(URL).text.replace('null', 'None'))[0][0][0]
@@ -86,18 +103,25 @@ class Translater(object):
 
             return translated
 
+class CliApp(Translate):
+    """
+    Cli app for Translate class
+    """
     def main(self):
         xerox.copy('')
 
         while True:
             if xerox.paste() != '':
-            	word = xerox.paste()
+                word = xerox.paste()
 
-                translated = self.translate(self.config['from'], self.config['to'], word)
-                self.send_notify('* {0}: {1}'.format(word, translated))
-                
-                xerox.copy('')
+                for word in word.split(' '):
+                    word = self.get_word(word)
+
+                    translated = self.translate(self.config['from'], self.config['to'], word)
+                    self.send_notify('* {0}: {1}'.format(word, translated))
+
+                    xerox.copy('')
 
 if __name__ == '__main__':
-    sct = Translater()
-    sct.main()
+    app = CliApp()
+    app.main()
