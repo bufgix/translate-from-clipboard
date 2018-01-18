@@ -5,8 +5,8 @@
 
 __author__ = '@laszlokuehl'
 
-import os, sys, signal, xerox
 import json, requests, string
+import os, sys, signal, xerox
 
 signal.signal(signal.SIGINT, lambda s, f: sys.exit())
 
@@ -67,7 +67,7 @@ class Translate(object):
         os.system(command)
 
     def insert_db(self, from_lang, to_lang, word, translated):
-        if from_lang not in self.database.keys():
+        if from_lang not in self.da :
             self.database[from_lang] = {}
 
         if word not in self.database[from_lang].keys():
@@ -83,9 +83,7 @@ class Translate(object):
 
     def search_online(self, from_lang, to_lang, word):
         URL = self.API.format(
-            from_lang=from_lang,
-            to_lang=to_lang,
-            query=urlencode({
+            from_lang=from_lang, to_lang=to_lang, query=urlencode({
                 'q': word
             }))
         translated = eval(requests.get(URL).text.replace('null', 'None'))[0][0][0]
@@ -103,10 +101,12 @@ class Translate(object):
 
             return translated
 
+
 class CliApp(Translate):
     """
     Cli app for Translate class
     """
+
     def main(self):
         xerox.copy('')
 
@@ -121,6 +121,7 @@ class CliApp(Translate):
                     self.send_notify('* {0}: {1}'.format(word, translated))
 
                     xerox.copy('')
+
 
 if __name__ == '__main__':
     app = CliApp()
