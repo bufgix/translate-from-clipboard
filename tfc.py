@@ -67,7 +67,7 @@ class Translate(object):
         os.system(command)
 
     def insert_db(self, from_lang, to_lang, word, translated):
-        if from_lang not in self.da :
+        if from_lang not in self.database:
             self.database[from_lang] = {}
 
         if word not in self.database[from_lang].keys():
