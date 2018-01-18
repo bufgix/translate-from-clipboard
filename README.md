@@ -1,5 +1,5 @@
-# start-copy-translate
-start-copy-translate
+# translate from clipboard
+translate from clipboard and store in a json file.
 
 ## example db
 ```json
